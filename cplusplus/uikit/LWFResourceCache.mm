@@ -21,6 +21,7 @@
 #import <UIKit/UIKit.h>
 #import "LWFResourceCache.h"
 #import "LWFBitmapRenderer.h"
+#import "LWFSettings.h"
 #import "lwf_core.h"
 #import "lwf_data.h"
 
@@ -195,6 +196,15 @@ UIImage *LWFResourceCache::loadTexture(
 	}
 
 	NSString *fullPath = [NSString stringWithUTF8String:path.c_str()];
+    
+    // Replacement to the path mapped in settings.
+    LWFSettings *settings = [LWFSettings sharedSettings];
+    NSString *textureName = [NSString stringWithUTF8String:texturePath.c_str()];
+    NSString *replaceFilePath = settings.imageMap[textureName];
+    if (replaceFilePath && [replaceFilePath isKindOfClass:[NSString class]]) {
+        fullPath = replaceFilePath;
+    }
+    
 	UIImage *image = [UIImage imageWithContentsOfFile:fullPath];
 	if (!image)
 		return NULL;
