@@ -41,6 +41,19 @@ public:
 	}
 };
 
+class AutolockTexture
+{
+private:
+    dispatch_semaphore_t m_texture_semaphore;
+public:
+    AutolockTexture(dispatch_semaphore_t s) : m_texture_semaphore(s) {
+        dispatch_semaphore_wait(m_texture_semaphore, DISPATCH_TIME_FOREVER);
+    }
+    ~AutolockTexture() {
+        dispatch_semaphore_signal(m_texture_semaphore);
+    }
+};
+
 LWFResourceCache *LWFResourceCache::m_instance;
 
 LWFResourceCache *LWFResourceCache::shared()
@@ -57,12 +70,14 @@ LWFResourceCache *LWFResourceCache::shared()
 LWFResourceCache::LWFResourceCache()
 {
 	m_semaphore = dispatch_semaphore_create(1);
+	m_texture_semaphore = dispatch_semaphore_create(1);
 }
 
 LWFResourceCache::~LWFResourceCache()
 {
 #if !OS_OBJECT_USE_OBJC
 	dispatch_release(m_semaphore);
+	dispatch_release(m_texture_semaphore);
 #endif
 }
 
@@ -171,7 +186,7 @@ UIImage *LWFResourceCache::loadTexture(
 		path = dataPath.substr(0, pos + 1) + texturePath;
 
 	{
-		Autolock lock(m_semaphore);
+        AutolockTexture lock(m_texture_semaphore);
 		TextureCache::iterator it = m_textureCache.find(path);
 		if (it != m_textureCache.end()) {
 			++it->second.refCount;
@@ -185,7 +200,7 @@ UIImage *LWFResourceCache::loadTexture(
 		return NULL;
 
 	{
-		Autolock lock(m_semaphore);
+        AutolockTexture lock(m_texture_semaphore);
 		m_textureCache[path] = TextureContext(image);
 		TextureCache::iterator it = m_textureCache.find(path);
 		m_textureCacheMap[image] = it;
@@ -196,7 +211,7 @@ UIImage *LWFResourceCache::loadTexture(
 
 void LWFResourceCache::unloadTexture(UIImage *uiImage)
 {
-	Autolock lock(m_semaphore);
+	AutolockTexture lock(m_texture_semaphore);
 	TextureCacheMap::iterator it = m_textureCacheMap.find(uiImage);
 	if (it == m_textureCacheMap.end())
 		return;
@@ -209,11 +224,16 @@ void LWFResourceCache::unloadTexture(UIImage *uiImage)
 
 void LWFResourceCache::unloadAll()
 {
-	Autolock lock(m_semaphore);
-	m_dataCache.clear();
-	m_dataCacheMap.clear();
-	m_textureCache.clear();
-	m_textureCacheMap.clear();
+    {
+        Autolock lock(m_semaphore);
+        m_dataCache.clear();
+        m_dataCacheMap.clear();
+    }
+    {
+        AutolockTexture lock(m_texture_semaphore);
+        m_textureCache.clear();
+        m_textureCacheMap.clear();
+    }
 }
 
 }	// namespace LWF

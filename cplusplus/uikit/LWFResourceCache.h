@@ -62,6 +62,7 @@ private:
 
 private:
 	dispatch_semaphore_t m_semaphore;
+	dispatch_semaphore_t m_texture_semaphore;
 	DataCache m_dataCache;
 	DataCacheMap m_dataCacheMap;
 	TextureCache m_textureCache;
