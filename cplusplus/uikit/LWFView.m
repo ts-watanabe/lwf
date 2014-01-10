@@ -35,7 +35,7 @@ NSString *const LFWViewFitForWidth = @"fitForWidth";
 {
     self = [super initWithCoder:aDecoder];
     if (self) {
-        self.displayList = [NSMutableArray array];
+        _displayList = @[].mutableCopy;
     }
     return self;
 }
@@ -44,7 +44,7 @@ NSString *const LFWViewFitForWidth = @"fitForWidth";
 {
     self = [super initWithFrame:frame];
     if (self) {
-        self.displayList = [NSMutableArray array];
+        _displayList = @[].mutableCopy;
     }
     return self;
 }
@@ -63,12 +63,12 @@ NSString *const LFWViewFitForWidth = @"fitForWidth";
 {
 	if (self.window) {
 		if (!self.displayLink && self.displayList) {
-			self.displayLink = [CADisplayLink
-				displayLinkWithTarget:self selector:@selector(update:)];
+			self.displayLink = [CADisplayLink displayLinkWithTarget:self
+                                                           selector:@selector(update:)];
 			[self.displayLink setFrameInterval:(
 				self.frameInterval <= 0 ? 1 : self.frameInterval)];
 			[self.displayLink addToRunLoop:[NSRunLoop currentRunLoop]
-				forMode:NSRunLoopCommonModes];
+                                   forMode:NSRunLoopCommonModes];
 		}
 	} else {
 		[self.displayLink invalidate];
@@ -122,18 +122,18 @@ NSString *const LFWViewFitForWidth = @"fitForWidth";
 	CFTimeInterval tick = sender.duration * sender.frameInterval;
 
 	for (LWFObject *lwfObject in self.displayList) {
-		if ([self.fit caseInsensitiveCompare:LFWViewFitForHeight] == NSOrderedSame)
-			[lwfObject fitForHeight:CGSizeMake(
-				self.frame.size.width, self.frame.size.height)];
-		else if ([self.fit
-				caseInsensitiveCompare:LFWViewFitForWidth] == NSOrderedSame)
-			[lwfObject fitForWidth:CGSizeMake(
-				self.frame.size.width, self.frame.size.height)];
+		if ([self.fit caseInsensitiveCompare:LFWViewFitForHeight] == NSOrderedSame) {
+			[lwfObject fitForHeight:self.frame.size];
+        }
+		else if ([self.fit caseInsensitiveCompare:LFWViewFitForWidth] == NSOrderedSame) {
+			[lwfObject fitForWidth:self.frame.size];
+        }
 		[lwfObject updateWithTick:tick];
 	}
 
-	for (LWFObject *lwfObject in self.displayList)
+	for (LWFObject *lwfObject in self.displayList) {
 		[lwfObject draw];
+    }
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
