@@ -31,20 +31,32 @@ NSString *const LFWViewFitForWidth = @"fitForWidth";
 
 @implementation LWFView
 
-- (void)awakeFromNib
+- (id)initWithCoder:(NSCoder *)aDecoder
 {
-	self.displayList = [NSMutableArray array];
-	if (self.path) {
-		LWFObject *lwfObject = [LWFObject lwfWithFile:self.path view:self];
-		[self addLWFObject:lwfObject];
-	}
+    self = [super initWithCoder:aDecoder];
+    if (self) {
+        self.displayList = [NSMutableArray array];
+    }
+    return self;
 }
 
 - (id)initWithFrame:(CGRect)frame
 {
-	self = [super initWithFrame:frame];
-	self.displayList = [NSMutableArray array];
-	return self;
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.displayList = [NSMutableArray array];
+    }
+    return self;
+}
+
+- (void)setPath:(NSString *)path
+{
+    if (_path != path) {
+        _path = path;
+
+        LWFObject *lwfObject = [LWFObject lwfWithFile:path view:self];
+        [self addLWFObject:lwfObject];
+    }
 }
 
 - (void)didMoveToWindow
