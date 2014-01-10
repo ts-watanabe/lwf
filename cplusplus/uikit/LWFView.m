@@ -158,4 +158,17 @@ NSString *const LFWViewFitForWidth = @"fitForWidth";
 	}
 }
 
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	UITouch *touch = [touches anyObject];
+	CGPoint point = [touch locationInView:self];
+    
+	for (LWFObject *lwfObject in self.displayList) {
+		if (lwfObject.interactive) {
+			[lwfObject inputPoint:point];
+			[lwfObject inputRelease];
+		}
+	}
+}
+
 @end
