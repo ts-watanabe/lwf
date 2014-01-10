@@ -21,6 +21,9 @@
 #import "LWFView.h"
 #import "LWFObject.h"
 
+NSString *const LFWViewFitForHeight = @"fitForHeight";
+NSString *const LFWViewFitForWidth = @"fitForWidth";
+
 @interface LWFView ()
 @property (nonatomic, strong) CADisplayLink *displayLink;
 @property (nonatomic, strong) NSMutableArray *displayList;
@@ -107,11 +110,11 @@
 	CFTimeInterval tick = sender.duration * sender.frameInterval;
 
 	for (LWFObject *lwfObject in self.displayList) {
-		if ([self.fit caseInsensitiveCompare:@"fitForHeight"] == NSOrderedSame)
+		if ([self.fit caseInsensitiveCompare:LFWViewFitForHeight] == NSOrderedSame)
 			[lwfObject fitForHeight:CGSizeMake(
 				self.frame.size.width, self.frame.size.height)];
 		else if ([self.fit
-				caseInsensitiveCompare:@"fitForWidth"] == NSOrderedSame)
+				caseInsensitiveCompare:LFWViewFitForWidth] == NSOrderedSame)
 			[lwfObject fitForWidth:CGSizeMake(
 				self.frame.size.width, self.frame.size.height)];
 		[lwfObject updateWithTick:tick];

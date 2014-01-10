@@ -20,6 +20,9 @@
 
 #import <UIKit/UIKit.h>
 
+UIKIT_EXTERN NSString *const LFWViewFitForHeight;
+UIKIT_EXTERN NSString *const LFWViewFitForWidth;
+
 @class LWFObject;
 
 /**
